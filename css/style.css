@@ -1,0 +1,16 @@
+p {
+  transition: all 0.3s ease-in-out;
+}
+
+.hover {
+  color: red;
+}
+
+.random {
+  opacity: 0.3;
+}
+
+input {
+  padding: 10px;
+  font-size: 16px;
+}
