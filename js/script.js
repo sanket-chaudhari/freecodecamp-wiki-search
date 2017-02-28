@@ -3,8 +3,7 @@
 //  ================
 
 var suggestionsContainerHidden = true; //Initially, the container is hidden - when the top section slides up, the container should become visible after a delay
-
-
+var translateYValue;
 
 //  ==========
 //  FUNCTIONS
@@ -98,16 +97,20 @@ function slideTopSectionUp(){
 }
 
 function showSuggestionsContainer(){
-  console.log(suggestionsContainerHidden);
-  console.log('Will now show suggestions');
   $('.suggestions-container').css({
     'display' : 'block'
     });
   suggestionsContainerHidden = false;
-
-  console.log(suggestionsContainerHidden);
 }
 
+function slideTopSectionDown(){
+  $('.top-section').css({
+    'transform' : 'translate(0px, '+ translateYValue +'px)'
+  });
+
+  $('.search-field > span').removeClass('fadeOut')
+  suggestionsContainerHidden = true;
+}
 
 //  ============================
 //  DOCUMENT.READY() STARTS HERE
@@ -127,7 +130,7 @@ $(document).ready(function(){
   let topHeight = searchBarVerticalHeight + logoContainerVerticalHeight;
 
   let viewPortHeight = $(window).height();
-  let translateYValue = 0.5*(viewPortHeight - topHeight);
+  translateYValue = 0.5*(viewPortHeight - topHeight);
 
   $('.top-section').css({
     'transform' : 'translate(0px, '+ translateYValue +'px)'
@@ -136,21 +139,30 @@ $(document).ready(function(){
 
   //
   //??? Is this required ???
+  //On the search results screen,
+  //If the user clicks on the search input field,
+  //clear the search results and show suggestions for the search term
+  //in the input field.
   $('#myInputField').focus(function(){
-
     $('.search-results-list').empty();
     $('.search-results-list').siblings().remove();
     fetchSearchTermSuggestions($(this).val());
   });
   //
 
+
+  //Adding keyboard shortcut - pressing escape clears the search field
+  //If escape pressed on an empty text field - system goes to initial state.
   $('#myInputField').keydown(function(e){
     if(e.originalEvent.key === 'Escape'){
-      $(this).val('');
+      if($(this).val()===''){
+        slideTopSectionDown();
+      } else {
+        $('.search-term-suggestions-list').empty();
+        $(this).val('');
+      }
     }
   });
-
-
 
   $("#myInputField").keypress(function(){
     slideTopSectionUp();
@@ -174,8 +186,11 @@ $(document).ready(function(){
   //Listen for keyboard event on the input text field - this is important as we intend to keep changing the list suggestions dynamically as the user types his/her search query.
   $("#myInputField").keyup(function(event){
 
-    $('.search-results-list').empty(); //Clear out the previously populated suggestion items
-    $('.search-results-list').siblings().remove();
+    // $('.search-results-list').empty(); //Clear out the previously populated suggestion items
+    // $('.search-results-list').siblings().remove();
+    //
+    // $('.search-term-suggestions-list').empty(); //Clear out the previously populated suggestion items
+    // $('.search-term-suggestions-list').siblings().remove();
 
     let inputFieldVal = $("#myInputField").val();
 
@@ -202,6 +217,7 @@ $(document).ready(function(){
    //When user clicks on this list-suggestion, run a wiki search on it.
   $(document).on("click", ".suggestion-item", function(){
       let searchTerm = $(this).text();
+      $('#myInputField').val(searchTerm);
       $('.search-term-suggestions-list').empty();
       // console.log('I just clicked');
       fetchSearchResults(searchTerm);
