@@ -22,9 +22,6 @@ body {
 .top-section {
   width: 800px;
   margin: auto;
-  position: absolute;
-  top: -20px;
-  bottom: 0;
 }
 
 .search-bar-container {

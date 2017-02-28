@@ -73,6 +73,7 @@ function getElementTotalVerticalHeight(className){
 
 }
 
+
 $(document).ready(function(){
 
   //This info is needed to vertically center the top container initially
@@ -81,9 +82,12 @@ $(document).ready(function(){
   let searchBarVerticalHeight = getElementTotalVerticalHeight('.search-bar-container');
   let logoContainerVerticalHeight = getElementTotalVerticalHeight('.logo-container');
   let topHeight = searchBarVerticalHeight + logoContainerVerticalHeight;
-  //Set the vertical height for top-section
+
+  let viewPortHeight = $(window).height();
+  let translateYValue = 0.5*(viewPortHeight - topHeight);
+
   $('.top-section').css({
-    'height' : topHeight
+    'transform' : 'translate(0px, '+ translateYValue +'px)'
   });
   //
   //
