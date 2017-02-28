@@ -6,9 +6,18 @@
 
 body {
   font-family: Lato, sans-serif;
+  color: #1B3A5E;
+  height: 100vh;
+  background-image: url(../assets/bg-image.png);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.content-container {
   width: 800px;
   margin: auto;
-  color: #1B3A5E;
 }
 
 .logo-container {
@@ -89,6 +98,7 @@ input[type=text] {
   color: #1B3A5E;
   position: relative;
   padding: 10px;
+  background-color: transparent;
 }
 
 input[type=text]:focus {
