@@ -1,3 +1,15 @@
+//  ================
+//  GLOBAL VARIABLES
+//  ================
+
+var suggestionsContainerHidden = true; //Initially, the container is hidden - when the top section slides up, the container should become visible after a delay
+
+
+
+//  ==========
+//  FUNCTIONS
+//  ==========
+
 function fetchSearchTermSuggestions(searchTerm){
 
   //generate requestURL
@@ -73,8 +85,36 @@ function getElementTotalVerticalHeight(className){
 
 }
 
+function slideTopSectionUp(){
+      $('.top-section').css({
+        'transition' : 'all 0.3s ease-in-out',
+        'transform' : 'translate(0px,0px)'
+      });
+
+      $('.search-field > span').addClass('fadeOut');
+}
+
+function showSuggestionsContainer(){
+  console.log(suggestionsContainerHidden);
+  console.log('Will now show suggestions');
+  $('.suggestions-container').css({
+    'display' : 'block'
+    });
+  suggestionsContainerHidden = false;
+
+  console.log(suggestionsContainerHidden);
+}
+
+
+//  ============================
+//  DOCUMENT.READY() STARTS HERE
+//  ============================
 
 $(document).ready(function(){
+
+  //The input field is focussed by default
+  $('#myInputField').focus();
+
 
   //This info is needed to vertically center the top container initially
   //
@@ -89,15 +129,34 @@ $(document).ready(function(){
   $('.top-section').css({
     'transform' : 'translate(0px, '+ translateYValue +'px)'
   });
-  //
-  //
-  //
 
 
+  //
+  //??? Is this required ???
   $('#myInputField').focus(function(){
     $('.search-results-list').empty();
     fetchSearchTermSuggestions($(this).val());
   });
+  //
+
+  $("#myInputField").keypress(function(){
+    slideTopSectionUp();
+    if(suggestionsContainerHidden){
+      setTimeout(showSuggestionsContainer, 200);
+    }
+  });
+
+  $("#myInputField").click(function(){
+    slideTopSectionUp();
+    if(suggestionsContainerHidden){
+      setTimeout(showSuggestionsContainer, 200);
+    }
+  });
+
+
+  //
+  //
+  //
 
   //Listen for keyboard event on the input text field - this is important as we intend to keep changing the list suggestions dynamically as the user types his/her search query.
   $("#myInputField").keyup(function(event){
@@ -116,12 +175,14 @@ $(document).ready(function(){
 
   //When the mouse enters a list-suggestion item, everything else should fade out. Give its siblings a particular class.
   $(document).on("mouseenter",".suggestion-item", function(){
-    $(this).siblings().addClass('blur');
+    $(this).addClass('focusItem');
+    $(this).siblings().addClass('blurItem');
   });
 
   //When mouse leaves a list-suggestion item, everything should return to normalcy. Remove the previously associated class.
   $(document).on("mouseleave", ".suggestion-item", function(){
-    $(this).siblings().removeClass('blur');
+    $(this).removeClass('focusItem');
+    $(this).siblings().removeClass('blurItem');
   });
 
    //When user clicks on this list-suggestion, run a wiki search on it.
