@@ -1,25 +1,18 @@
-function listSuggestions(searchTerm){
+function fetchSearchTermSuggestions(searchTerm){
 
   //generate requestURL
   let requestURL = "https://en.wikipedia.org/w/api.php?action=opensearch&format=json&search="+searchTerm+"&utf8=1";
 
   //fetch and display data
   $.getJSON(requestURL, function(data){
-    console.log(data);
-    let suggestionsList = data[1];
-
-    //Clear all child suggestions before populating the suggestions list...
-    $("#list-suggestions").empty();
-
-    //...and then populate the list of suggestions
-    $.each(suggestionsList, function(index, val){
-      $('#list-suggestions').append("<p>"+ val +"</p>");
-    });
+    //console.log(data);
+    let suggestionTermsArr = data[1];
+    displaySearchTermSuggestions(suggestionTermsArr);
 
   });
 }
 
-function listSearchResults(searchTerm){
+function fetchSearchResults(searchTerm){
   //generate request URL
   let requestURL = "https://en.wikipedia.org/w/api.php?format=json&action=query&generator=search&gsrnamespace=0&gsrlimit=10&prop=pageimages|extracts&pilimit=max&exintro&explaintext&exsentences=1&exlimit=max&gsrsearch="+searchTerm;
 
@@ -45,45 +38,92 @@ function listSearchResults(searchTerm){
     });
 
     //Display Search Results
-    console.log(searchResultsArr);
+    displaySearchResults(searchResultsArr);
   });
 
+}
+
+function displaySearchTermSuggestions(suggestionTermsArr){
+  //Clear all child suggestions before populating the suggestions list...
+  $(".search-term-suggestions-list").empty();
+
+  //...and then populate the list of suggestions
+  $.each(suggestionTermsArr, function(index, val){
+    $('.search-term-suggestions-list').append("<li class=\"suggestion-item\">"+ val +"</li>");
+  });
+}
+
+function displaySearchResults(searchResultsArr){
+  $.each(searchResultsArr,function(index, value){
+    let resultTitle = Object.keys(value[1]);
+    let resultExtract = Object.values(value[1]);
+
+    $('.search-results-list').append('<li><h1 class=\"search-result-title\">' + resultTitle + '</h1><p class=\"search-result-extract\">' + resultExtract + '</p></li>');
+  });
+}
+
+function openWikiLink(wikiSearchParam){
+  let requestUrl = "https://en.wikipedia.org/wiki/" + wikiSearchParam;
+  window.open(requestUrl);
 }
 
 
 $(document).ready(function(){
 
-  $('#myInputField').focus();
+  $('#myInputField').focus(function(){
+    $('.search-results-list').empty();
+    fetchSearchTermSuggestions($(this).val());
+  });
 
   //Listen for keyboard event on the input text field - this is important as we intend to keep changing the list suggestions dynamically as the user types his/her search query.
   $("#myInputField").keyup(function(event){
 
-      //console.log(event);
-      let inputFieldVal = $("#myInputField").val();
+    $('.search-results-list').empty(); //Clear out the previously populated suggestion items
 
-      if(event.originalEvent.key === "Enter"){
-        listSearchResults(inputFieldVal)  //If the user hits enter, return search results
-      } else {
-        listSuggestions(inputFieldVal); //else, keep listing suggestions based on what he/she is typing.
-      }
-    });
+    let inputFieldVal = $("#myInputField").val();
+
+    if(event.originalEvent.key === "Enter"){
+      $('.search-term-suggestions-list').empty();
+      fetchSearchResults(inputFieldVal);  //If the user hits enter, return search results
+    } else {
+      fetchSearchTermSuggestions(inputFieldVal); //else, keep listing suggestions based on what he/she is typing.
+    }
+  });
 
   //When the mouse enters a list-suggestion item, everything else should fade out. Give its siblings a particular class.
-  $(document).on("mouseenter","p", function(){
-    $(this).siblings().addClass('random');
+  $(document).on("mouseenter",".suggestion-item", function(){
+    $(this).siblings().addClass('blur');
   });
 
   //When mouse leaves a list-suggestion item, everything should return to normalcy. Remove the previously associated class.
-  $(document).on("mouseleave", "p", function(){
-    $(this).siblings().removeClass('random');
+  $(document).on("mouseleave", ".suggestion-item", function(){
+    $(this).siblings().removeClass('blur');
   });
 
    //When user clicks on this list-suggestion, run a wiki search on it.
-  $(document).on("click", "p", function(){
+  $(document).on("click", ".suggestion-item", function(){
       let searchTerm = $(this).text();
+      $('.search-term-suggestions-list').empty();
       // console.log('I just clicked');
-      listSearchResults(searchTerm);
+      fetchSearchResults(searchTerm);
   });
 
+  //When mouse enters a search result item : change its state to indicate focus
+  $(document).on("mouseenter",".search-results-list > li", function(){
+    $(this).addClass('blue-border');
+    $(this).siblings().addClass('blur');
+  });
+
+  //When mouse leaves the item, revert back to original state
+  $(document).on("mouseleave",".search-results-list > li", function(){
+    $(this).removeClass('blue-border');
+    $(this).siblings().removeClass('blur');
+  });
+
+  //On clicking on the search result item - open the link in a new window
+  $(document).on("click",".search-results-list > li", function(){
+    let wikiSearchParam = $(this).find('.search-result-title').text().split(" ").join("_"); //Format the search result title into wiki search url parameter
+    openWikiLink(wikiSearchParam);  //Open link
+  });
 
 });
