@@ -5,6 +5,8 @@
 var suggestionsContainerHidden = true; //Initially, the container is hidden - when the top section slides up, the container should become visible after a delay
 var translateYValue;
 
+
+
 //  ==========
 //  FUNCTIONS
 //  ==========
@@ -111,6 +113,8 @@ function slideTopSectionDown(){
   $('.search-field > span').removeClass('fadeOut')
   suggestionsContainerHidden = true;
 }
+
+
 
 //  ============================
 //  DOCUMENT.READY() STARTS HERE
@@ -241,4 +245,8 @@ $(document).ready(function(){
     openWikiLink(wikiSearchParam);  //Open link
   });
 
+  $('.random-article-button').click(function(){
+    let randomWikiSearchParam = 'Special:Random';
+    openWikiLink(randomWikiSearchParam);
+  });
 });
