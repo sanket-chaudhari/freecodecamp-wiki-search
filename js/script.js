@@ -50,7 +50,7 @@ function fetchSearchResults(searchTerm){
     });
 
     //Display Search Results
-    displaySearchResults(searchResultsArr);
+    displaySearchResults(searchResultsArr, searchTerm);
   });
 
 }
@@ -65,12 +65,15 @@ function displaySearchTermSuggestions(suggestionTermsArr){
   });
 }
 
-function displaySearchResults(searchResultsArr){
+function displaySearchResults(searchResultsArr,searchTerm){
+
+  totalSearchResults = searchResultsArr.length;
+  $('.search-results-container').prepend('<p>Showing <span class=\"total-results\">' + totalSearchResults + '</span> results for <span class=\"search-term\">\"' + searchTerm + '\"</span></p>');
   $.each(searchResultsArr,function(index, value){
     let resultTitle = Object.keys(value[1]);
     let resultExtract = Object.values(value[1]);
 
-    $('.search-results-list').append('<li><h1 class=\"search-result-title\">' + resultTitle + '</h1><p class=\"search-result-extract\">' + resultExtract + '</p></li>');
+    $('.search-results-list').append('<li class=\"search-result-item\"><h1 class=\"search-result-title\">' + resultTitle + '</h1><p class=\"search-result-extract\">' + resultExtract + '</p><div class=\"redirect-icon\"></div></li>');
   });
 }
 
@@ -134,10 +137,20 @@ $(document).ready(function(){
   //
   //??? Is this required ???
   $('#myInputField').focus(function(){
+
     $('.search-results-list').empty();
+    $('.search-results-list').siblings().remove();
     fetchSearchTermSuggestions($(this).val());
   });
   //
+
+  $('#myInputField').keydown(function(e){
+    if(e.originalEvent.key === 'Escape'){
+      $(this).val('');
+    }
+  });
+
+
 
   $("#myInputField").keypress(function(){
     slideTopSectionUp();
@@ -162,6 +175,7 @@ $(document).ready(function(){
   $("#myInputField").keyup(function(event){
 
     $('.search-results-list').empty(); //Clear out the previously populated suggestion items
+    $('.search-results-list').siblings().remove();
 
     let inputFieldVal = $("#myInputField").val();
 
@@ -195,14 +209,14 @@ $(document).ready(function(){
 
   //When mouse enters a search result item : change its state to indicate focus
   $(document).on("mouseenter",".search-results-list > li", function(){
-    $(this).addClass('blue-border');
-    $(this).siblings().addClass('blur');
+    $(this).addClass('focus-search-result');
+    $(this).siblings().addClass('blur-search-result');
   });
 
   //When mouse leaves the item, revert back to original state
   $(document).on("mouseleave",".search-results-list > li", function(){
-    $(this).removeClass('blue-border');
-    $(this).siblings().removeClass('blur');
+    $(this).removeClass('focus-search-result');
+    $(this).siblings().removeClass('blur-search-result');
   });
 
   //On clicking on the search result item - open the link in a new window
