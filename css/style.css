@@ -6,6 +6,16 @@
 
 body {
   font-family: Lato, sans-serif;
+  color: #1B3A5E;
+  height: 100vh;
+  background-image: url(../assets/bg-image.png);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.content-container {
   width: 800px;
   margin: auto;
 }
@@ -22,9 +32,10 @@ body {
 .top-section {
   width: 800px;
   margin: auto;
-  position: absolute;
-  top: -20px;
-  bottom: 0;
+}
+
+.top-section.slideUp {
+  transform: translate(0px, 0px);
 }
 
 .search-bar-container {
@@ -32,7 +43,7 @@ body {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin: 50px 0px;
+  margin-top: 50px;
 }
 
 .search-field {
@@ -52,12 +63,17 @@ body {
   background-position: center center;
 }
 
-.search-field .underline {
-  height: 3px;
+.underline {
+  transition: all 0.3s ease-in-out;
+  height: 2px;
   background-color: #4A90E2;
   width: 100%;
   display: block;
   margin-top: 10px;
+}
+
+.fadeOut {
+  opacity: 0.2;
 }
 
 .random-article-button {
@@ -71,8 +87,16 @@ body {
   border: 1px solid #4A90E2;
   display: flex;
   align-items: center;
+  transition: all 0.1s ease-in-out;
   position: relative;
   top: -6px;
+}
+
+.random-article-button:hover {
+  cursor: pointer;
+  background-color: #4A90E2;
+  color: white;
+  box-shadow: none;
 }
 
 input[type=text] {
@@ -81,6 +105,8 @@ input[type=text] {
   font-weight: 700;
   color: #1B3A5E;
   position: relative;
+  padding: 10px;
+  background-color: transparent;
 }
 
 input[type=text]:focus {
@@ -107,28 +133,125 @@ input[type=text]:-moz-placeholder {
   opacity: 0.15;
 }
 
-li {
-  transition: all 0.3s ease-in-out;
-  list-style-type: none;
+.suggestions-container {
+  display: none;
 }
 
-.blur {
+.search-term-suggestions-list {
+  list-style-type: none;
+  margin-top: 30px;
+  padding-left: 62px;
+}
+
+.search-term-suggestions-list .suggestion-item {
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+  margin: 20px 0px;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.search-term-suggestions-list .suggestion-item.focusItem {
+  font-weight: 700;
+}
+
+.search-term-suggestions-list .suggestion-item.blurItem {
   opacity: 0.3;
 }
 
-.blue-border {
-  border: 1px solid blue;
+.search-term-suggestions-list .suggestion-item:first-child {
+  margin-top: 0px;
 }
 
-input {
-  padding: 10px;
-  font-size: 16px;
+.search-term-suggestions-list .suggestion-item:last-child {
+  margin-bottom: 0px;
 }
 
-h1.search-result-title {
+.search-results-container {
+  margin-top: 55px;
+}
+
+.search-results-container > p {
+  font-size: 14px;
+  font-weight: 400;
+  opacity: 0.34;
+  margin-bottom: 20px;
+}
+
+.search-results-container > p .total-results {
+  font-weight: 700;
+}
+
+.search-results-list {
+  list-style-type: none;
+}
+
+.search-result-item {
+  cursor: pointer;
+  position: relative;
+  transition: all 0.1s ease-in-out;
+  padding: 20px;
+  background: white;
+  border: 1px solid #E8EDF2;
+  margin-bottom: 10px;
+}
+
+.search-result-item::after {
+  content: '';
+  height: 100%;
+  width: 50px;
+  background-color: #4A90E2;
+  right: 0px;
+  top: 0px;
+  position: absolute;
+  transition: all 0.1s ease-in-out;
+  opacity: 0;
+}
+
+.search-result-item .redirect-icon {
+  position: absolute;
+  margin: auto;
+  top: 0px;
+  bottom: 0px;
+  height: 16px;
+  width: 16px;
+  right: -20px;
+  z-index: 1;
+  background-image: url(../assets/redirect.png);
+  background-size: 12px 12px;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.search-result-item:hover .redirect-icon {
+  right: 16px;
+}
+
+.search-result-item:hover::after {
+  opacity: 1;
+}
+
+.search-result-item.focus-search-result {
+  border: 1px solid #4A90E2;
+  box-shadow: 0px 2px 4px 0px rgba(74, 144, 226, 0.15);
+}
+
+.search-result-item.blur-search-result {
+  opacity: 1;
+}
+
+.search-result-title {
   font-size: 18px;
+  font-weight: 700;
+  font-family: Lato, sans-serif;
+  margin-bottom: 8px;
 }
 
-p.search-result-extract {
-  opacity: 0.4;
+.search-result-extract {
+  width: 600px;
+  font-family: "Open Sans", sans-serif;
+  font-weight: 400;
+  line-height: 1.4;
+  font-size: 14px;
+  color: rgba(27, 58, 94, 0.4);
 }

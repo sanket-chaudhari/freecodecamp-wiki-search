@@ -1,3 +1,16 @@
+//  ================
+//  GLOBAL VARIABLES
+//  ================
+
+var suggestionsContainerHidden = true; //Initially, the container is hidden - when the top section slides up, the container should become visible after a delay
+var translateYValue;
+
+
+
+//  ==========
+//  FUNCTIONS
+//  ==========
+
 function fetchSearchTermSuggestions(searchTerm){
 
   //generate requestURL
@@ -38,7 +51,7 @@ function fetchSearchResults(searchTerm){
     });
 
     //Display Search Results
-    displaySearchResults(searchResultsArr);
+    displaySearchResults(searchResultsArr, searchTerm);
   });
 
 }
@@ -53,12 +66,15 @@ function displaySearchTermSuggestions(suggestionTermsArr){
   });
 }
 
-function displaySearchResults(searchResultsArr){
+function displaySearchResults(searchResultsArr,searchTerm){
+
+  totalSearchResults = searchResultsArr.length;
+  $('.search-results-container').prepend('<p>Showing <span class=\"total-results\">' + totalSearchResults + '</span> results for <span class=\"search-term\">\"' + searchTerm + '\"</span></p>');
   $.each(searchResultsArr,function(index, value){
     let resultTitle = Object.keys(value[1]);
     let resultExtract = Object.values(value[1]);
 
-    $('.search-results-list').append('<li><h1 class=\"search-result-title\">' + resultTitle + '</h1><p class=\"search-result-extract\">' + resultExtract + '</p></li>');
+    $('.search-results-list').append('<li class=\"search-result-item\"><h1 class=\"search-result-title\">' + resultTitle + '</h1><p class=\"search-result-extract\">' + resultExtract + '</p><div class=\"redirect-icon\"></div></li>');
   });
 }
 
@@ -73,7 +89,42 @@ function getElementTotalVerticalHeight(className){
 
 }
 
+function slideTopSectionUp(){
+      $('.top-section').css({
+        'transition' : 'all 0.3s ease-in-out',
+        'transform' : 'translate(0px,0px)'
+      });
+
+      $('.search-field > span').addClass('fadeOut');
+}
+
+function showSuggestionsContainer(){
+  $('.suggestions-container').css({
+    'display' : 'block'
+    });
+  suggestionsContainerHidden = false;
+}
+
+function slideTopSectionDown(){
+  $('.top-section').css({
+    'transform' : 'translate(0px, '+ translateYValue +'px)'
+  });
+
+  $('.search-field > span').removeClass('fadeOut')
+  suggestionsContainerHidden = true;
+}
+
+
+
+//  ============================
+//  DOCUMENT.READY() STARTS HERE
+//  ============================
+
 $(document).ready(function(){
+
+  //The input field is focussed by default
+  $('#myInputField').focus();
+
 
   //This info is needed to vertically center the top container initially
   //
@@ -81,24 +132,69 @@ $(document).ready(function(){
   let searchBarVerticalHeight = getElementTotalVerticalHeight('.search-bar-container');
   let logoContainerVerticalHeight = getElementTotalVerticalHeight('.logo-container');
   let topHeight = searchBarVerticalHeight + logoContainerVerticalHeight;
-  //Set the vertical height for top-section
+
+  let viewPortHeight = $(window).height();
+  translateYValue = 0.5*(viewPortHeight - topHeight);
+
   $('.top-section').css({
-    'height' : topHeight
+    'transform' : 'translate(0px, '+ translateYValue +'px)'
   });
-  //
-  //
-  //
 
 
+  //
+  //??? Is this required ???
+  //On the search results screen,
+  //If the user clicks on the search input field,
+  //clear the search results and show suggestions for the search term
+  //in the input field.
   $('#myInputField').focus(function(){
     $('.search-results-list').empty();
+    $('.search-results-list').siblings().remove();
     fetchSearchTermSuggestions($(this).val());
   });
+  //
+
+
+  //Adding keyboard shortcut - pressing escape clears the search field
+  //If escape pressed on an empty text field - system goes to initial state.
+  $('#myInputField').keydown(function(e){
+    if(e.originalEvent.key === 'Escape'){
+      if($(this).val()===''){
+        slideTopSectionDown();
+      } else {
+        $('.search-term-suggestions-list').empty();
+        $(this).val('');
+      }
+    }
+  });
+
+  $("#myInputField").keypress(function(){
+    slideTopSectionUp();
+    if(suggestionsContainerHidden){
+      setTimeout(showSuggestionsContainer, 200);
+    }
+  });
+
+  $("#myInputField").click(function(){
+    slideTopSectionUp();
+    if(suggestionsContainerHidden){
+      setTimeout(showSuggestionsContainer, 200);
+    }
+  });
+
+
+  //
+  //
+  //
 
   //Listen for keyboard event on the input text field - this is important as we intend to keep changing the list suggestions dynamically as the user types his/her search query.
   $("#myInputField").keyup(function(event){
 
-    $('.search-results-list').empty(); //Clear out the previously populated suggestion items
+    // $('.search-results-list').empty(); //Clear out the previously populated suggestion items
+    // $('.search-results-list').siblings().remove();
+    //
+    // $('.search-term-suggestions-list').empty(); //Clear out the previously populated suggestion items
+    // $('.search-term-suggestions-list').siblings().remove();
 
     let inputFieldVal = $("#myInputField").val();
 
@@ -112,17 +208,20 @@ $(document).ready(function(){
 
   //When the mouse enters a list-suggestion item, everything else should fade out. Give its siblings a particular class.
   $(document).on("mouseenter",".suggestion-item", function(){
-    $(this).siblings().addClass('blur');
+    $(this).addClass('focusItem');
+    $(this).siblings().addClass('blurItem');
   });
 
   //When mouse leaves a list-suggestion item, everything should return to normalcy. Remove the previously associated class.
   $(document).on("mouseleave", ".suggestion-item", function(){
-    $(this).siblings().removeClass('blur');
+    $(this).removeClass('focusItem');
+    $(this).siblings().removeClass('blurItem');
   });
 
    //When user clicks on this list-suggestion, run a wiki search on it.
   $(document).on("click", ".suggestion-item", function(){
       let searchTerm = $(this).text();
+      $('#myInputField').val(searchTerm);
       $('.search-term-suggestions-list').empty();
       // console.log('I just clicked');
       fetchSearchResults(searchTerm);
@@ -130,14 +229,14 @@ $(document).ready(function(){
 
   //When mouse enters a search result item : change its state to indicate focus
   $(document).on("mouseenter",".search-results-list > li", function(){
-    $(this).addClass('blue-border');
-    $(this).siblings().addClass('blur');
+    $(this).addClass('focus-search-result');
+    $(this).siblings().addClass('blur-search-result');
   });
 
   //When mouse leaves the item, revert back to original state
   $(document).on("mouseleave",".search-results-list > li", function(){
-    $(this).removeClass('blue-border');
-    $(this).siblings().removeClass('blur');
+    $(this).removeClass('focus-search-result');
+    $(this).siblings().removeClass('blur-search-result');
   });
 
   //On clicking on the search result item - open the link in a new window
@@ -146,4 +245,8 @@ $(document).ready(function(){
     openWikiLink(wikiSearchParam);  //Open link
   });
 
+  $('.random-article-button').click(function(){
+    let randomWikiSearchParam = 'Special:Random';
+    openWikiLink(randomWikiSearchParam);
+  });
 });
