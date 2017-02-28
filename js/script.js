@@ -67,8 +67,28 @@ function openWikiLink(wikiSearchParam){
   window.open(requestUrl);
 }
 
+function getElementTotalVerticalHeight(className){
+  let totalElementHeight = parseInt($(className).height()) + parseInt($(className).css('margin-bottom')) + parseInt($(className).css('margin-top')) + parseInt($(className).css('padding-top')) + parseInt($(className).css('padding-bottom'));
+  return totalElementHeight;
+
+}
 
 $(document).ready(function(){
+
+  //This info is needed to vertically center the top container initially
+  //
+  //Compute vertical height of search bar and logo container
+  let searchBarVerticalHeight = getElementTotalVerticalHeight('.search-bar-container');
+  let logoContainerVerticalHeight = getElementTotalVerticalHeight('.logo-container');
+  let topHeight = searchBarVerticalHeight + logoContainerVerticalHeight;
+  //Set the vertical height for top-section
+  $('.top-section').css({
+    'height' : topHeight
+  });
+  //
+  //
+  //
+
 
   $('#myInputField').focus(function(){
     $('.search-results-list').empty();
