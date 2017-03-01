@@ -5,7 +5,20 @@
 var suggestionsContainerHidden = true; //Initially, the container is hidden - when the top section slides up, the container should become visible after a delay
 var translateYValue;
 
-
+function search() {
+  $.ajax({
+    url: url + escape($("#search").val()),
+    jsonp: "callback",
+    dataType: "jsonp",
+    success: function(resp) {
+      // Empty before inserting everything
+      $("#results").empty();
+      for (var i=0; i<resp[1].length; i++) {
+        insertHTML(resp[1][i], resp[2][i], resp[3][i]);
+      }
+    }
+  });
+}
 
 //  ==========
 //  FUNCTIONS
@@ -17,42 +30,83 @@ function fetchSearchTermSuggestions(searchTerm){
   let requestURL = "https://en.wikipedia.org/w/api.php?action=opensearch&format=json&search="+searchTerm+"&utf8=1";
 
   //fetch and display data
-  $.getJSON(requestURL, function(data){
-    //console.log(data);
-    let suggestionTermsArr = data[1];
-    displaySearchTermSuggestions(suggestionTermsArr);
+  // $.getJSON(requestURL, function(data){
+  //   //console.log(data);
+  //   let suggestionTermsArr = data[1];
+  //   displaySearchTermSuggestions(suggestionTermsArr);
+  //
+  // });
 
-  });
+  $.ajax({
+      url: requestURL,
+      jsonp: "callback",
+      dataType: "jsonp",
+      success: function(data) {
+        // Empty before inserting everything
+        let suggestionTermsArr = data[1];
+        displaySearchTermSuggestions(suggestionTermsArr);
+        }
+      });
 }
+
 
 function fetchSearchResults(searchTerm){
   //generate request URL
   let requestURL = "https://en.wikipedia.org/w/api.php?format=json&action=query&generator=search&gsrnamespace=0&gsrlimit=10&prop=pageimages|extracts&pilimit=max&exintro&explaintext&exsentences=1&exlimit=max&gsrsearch="+searchTerm;
 
   //Fetch response as a JSON object
-  $.getJSON(requestURL, function(data){
+  // $.getJSON(requestURL, function(data){
+  //
+  //   //Grab the required stuff from the resultant data object.
+  //   let responseObj = data.query.pages;
+  //   let searchResultsArr = [];
+  //
+  //   //Create an array with the search results --- format : [[searchIndex, {searchResultObj}],[,{}],...]
+  //   //This shall help us sort the results according to their search index value as returned by the wiki api
+  //   $.each(responseObj, function(key, val){
+  //     let title = val.title;
+  //     let titleExtractPairObj = {};
+  //     titleExtractPairObj[title] = val.extract
+  //     searchResultsArr.push([val['index'], titleExtractPairObj]);
+  //   });
+  //
+  //   //Sort the search results by their search result index
+  //   searchResultsArr.sort(function(a,b){
+  //     return a[0] - b[0];
+  //   });
+  //
+  //   //Display Search Results
+  //   displaySearchResults(searchResultsArr, searchTerm);
+  // });
 
-    //Grab the required stuff from the resultant data object.
-    let responseObj = data.query.pages;
-    let searchResultsArr = [];
+  $.ajax({
+      url: requestURL,
+      jsonp: "callback",
+      dataType: "jsonp",
+      success: function(data) {
+          //Grab the required stuff from the resultant data object.
+          let responseObj = data.query.pages;
+          let searchResultsArr = [];
 
-    //Create an array with the search results --- format : [[searchIndex, {searchResultObj}],[,{}],...]
-    //This shall help us sort the results according to their search index value as returned by the wiki api
-    $.each(responseObj, function(key, val){
-      let title = val.title;
-      let titleExtractPairObj = {};
-      titleExtractPairObj[title] = val.extract
-      searchResultsArr.push([val['index'], titleExtractPairObj]);
-    });
+          //Create an array with the search results --- format : [[searchIndex, {searchResultObj}],[,{}],...]
+          //This shall help us sort the results according to their search index value as returned by the wiki api
+          $.each(responseObj, function(key, val){
+            let title = val.title;
+            let titleExtractPairObj = {};
+            titleExtractPairObj[title] = val.extract
+            searchResultsArr.push([val['index'], titleExtractPairObj]);
+          });
 
-    //Sort the search results by their search result index
-    searchResultsArr.sort(function(a,b){
-      return a[0] - b[0];
-    });
+          //Sort the search results by their search result index
+          searchResultsArr.sort(function(a,b){
+            return a[0] - b[0];
+          });
 
-    //Display Search Results
-    displaySearchResults(searchResultsArr, searchTerm);
-  });
+          //Display Search Results
+          displaySearchResults(searchResultsArr, searchTerm);
+
+        }
+      });
 
 }
 
