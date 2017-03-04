@@ -177,7 +177,7 @@ function slideTopSectionDown(){
 $(document).ready(function(){
 
   //The input field is focussed by default
-  $('#myInputField').focus();
+  // $('#myInputField').focus();
 
 
   //This info is needed to vertically center the top container initially
